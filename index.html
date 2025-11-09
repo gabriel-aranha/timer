@@ -167,20 +167,28 @@
         function exportToCSV() {
             const houseName = document.getElementById('sessionName').value || 'Unnamed House';
             
-            // Create header row
-            let csvContent = 'House,Start Timer,';
+            // Create rows array
+            const rows = [];
+            
+            // Add header row
+            let headerRow = ['House', 'Start Timer'];
             for (let i = 1; i <= laps.length; i++) {
-                csvContent += `Lap ${i},Cycle Time ${i},`;
+                headerRow.push(`Lap ${i}`, `Cycle Time ${i}`);
             }
-            csvContent = csvContent.slice(0, -1) + '\n'; // Remove last comma and add newline
+            rows.push(headerRow.join(','));
             
             // Add data row
-            csvContent += `${houseName},00:00:000,`;
+            let dataRow = [houseName, '00:00:000'];
             laps.forEach((lap, index) => {
-                csvContent += `${formatTime(lap.totalTime)},`;
-                csvContent += `${index > 0 ? formatTime(lap.lapTime) : formatTime(lap.totalTime)},`;
+                dataRow.push(
+                    formatTime(lap.totalTime),
+                    index > 0 ? formatTime(lap.lapTime) : formatTime(lap.totalTime)
+                );
             });
-            csvContent = csvContent.slice(0, -1); // Remove last comma
+            rows.push(dataRow.join(','));
+            
+            // Join rows with CRLF (Windows-style newline) for better Excel compatibility
+            const csvContent = rows.join('\r\n');
 
             // Create and trigger download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
