@@ -167,28 +167,30 @@
         function exportToCSV() {
             const houseName = document.getElementById('sessionName').value || 'Unnamed House';
             
-            // Create rows array
-            const rows = [];
+            // Function to escape and quote CSV fields
+            function escapeField(field) {
+                return `"${field.toString().replace(/"/g, '""')}"`;
+            }
             
-            // Add header row
-            let headerRow = ['House', 'Start Timer'];
+            // Create CSV content
+            const headerRow = ['House', 'Start Timer'];
             for (let i = 1; i <= laps.length; i++) {
                 headerRow.push(`Lap ${i}`, `Cycle Time ${i}`);
             }
-            rows.push(headerRow.join(','));
             
-            // Add data row
-            let dataRow = [houseName, '00:00:000'];
+            const dataRow = [houseName, '00:00:000'];
             laps.forEach((lap, index) => {
                 dataRow.push(
                     formatTime(lap.totalTime),
                     index > 0 ? formatTime(lap.lapTime) : formatTime(lap.totalTime)
                 );
             });
-            rows.push(dataRow.join(','));
             
-            // Join rows with CRLF (Windows-style newline) for better Excel compatibility
-            const csvContent = rows.join('\r\n');
+            // Quote all fields and join with proper line endings
+            const csvContent = 
+                headerRow.map(escapeField).join(',') + 
+                '\n' + 
+                dataRow.map(escapeField).join(',');
 
             // Create and trigger download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
