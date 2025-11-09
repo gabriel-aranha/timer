@@ -172,19 +172,18 @@
                 return `"${field.toString().replace(/"/g, '""')}"`;
             }
             
-            // Calculate cycle times
+            // Calculate cycle times using lapTime values
             function calculateCycleTimes() {
                 const cycleTimes = {};
-                for (let i = 0; i < laps.length; i++) {
-                    // For first cycle time (Lap 1 - Start)
-                    if (i === 0) {
-                        cycleTimes[1] = laps[0].totalTime;
-                    }
-                    // For subsequent cycle times
-                    // When i is even (2,4,6,...), calculate Lap (i+1) - Lap (i)
-                    else if (i % 2 === 0 && i + 1 < laps.length) {
-                        const cycleNumber = (i / 2) + 1;
-                        cycleTimes[cycleNumber] = laps[i + 1].totalTime - laps[i].totalTime;
+                // First cycle is first lap's total time (from start)
+                if (laps.length > 0) {
+                    cycleTimes[1] = laps[0].totalTime;
+                }
+                // For each subsequent pair, use the actual lap times
+                for (let i = 1; i < laps.length; i++) {
+                    if (i % 2 === 1) { // For laps 2-3, 4-5, etc.
+                        const cycleNumber = Math.floor(i/2) + 2;
+                        cycleTimes[cycleNumber] = laps[i].lapTime;
                     }
                 }
                 return cycleTimes;
