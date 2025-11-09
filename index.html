@@ -167,14 +167,13 @@
         function exportToCSV() {
             const houseName = document.getElementById('sessionName').value || 'Unnamed House';
             
-            // Prepare CSV rows
+            // Create header row
             let csvContent = 'House,Start Timer,';
             for (let i = 1; i <= laps.length; i++) {
-                csvContent += `Lap ${i},`;
-                csvContent += `Cycle Time ${i},`;
+                csvContent += `Lap ${i},Cycle Time ${i},`;
             }
-            csvContent = csvContent.slice(0, -1) + '\\n'; // Remove last comma and add newline
-
+            csvContent = csvContent.slice(0, -1) + '\n'; // Remove last comma and add newline
+            
             // Add data row
             csvContent += `${houseName},00:00:000,`;
             laps.forEach((lap, index) => {
