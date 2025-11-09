@@ -172,24 +172,7 @@
                 return `"${field.toString().replace(/"/g, '""')}"`;
             }
             
-            // Calculate cycle times using lapTime values
-            function calculateCycleTimes() {
-                const cycleTimes = {};
-                // First cycle is first lap's total time (from start)
-                if (laps.length > 0) {
-                    cycleTimes[1] = laps[0].totalTime;
-                }
-                // For each subsequent pair, use the actual lap times
-                for (let i = 1; i < laps.length; i++) {
-                    if (i % 2 === 1) { // For laps 2-3, 4-5, etc.
-                        const cycleNumber = Math.floor(i/2) + 2;
-                        cycleTimes[cycleNumber] = laps[i].lapTime;
-                    }
-                }
-                return cycleTimes;
-            }
-            
-            // Create header row
+            // Create header row - matches web display format
             const headerRow = ['House', 'Start Timer'];
             for (let i = 1; i <= laps.length; i++) {
                 headerRow.push(`Lap ${i}`);
@@ -200,18 +183,19 @@
                 }
             }
             
-            // Create data row
+            // Create data row - exactly matching web display
             const dataRow = [houseName, '00:00:000'];
-            const cycleTimes = calculateCycleTimes();
             
             laps.forEach((lap, index) => {
+                // Add the lap's total time
                 dataRow.push(formatTime(lap.totalTime));
-                // Add cycle time after odd-numbered laps
+                
+                // Add cycle time after odd-numbered laps (1,3,5,...)
                 if (index % 2 === 0) {
-                    const cycleNumber = Math.floor(index/2) + 1;
-                    if (cycleTimes[cycleNumber]) {
-                        dataRow.push(formatTime(cycleTimes[cycleNumber]));
-                    }
+                    // For first lap, cycle time is total time
+                    // For other odd laps, cycle time is lap time
+                    const cycleTime = index === 0 ? lap.totalTime : lap.lapTime;
+                    dataRow.push(formatTime(cycleTime));
                 }
             });
             
