@@ -172,18 +172,48 @@
                 return `"${field.toString().replace(/"/g, '""')}"`;
             }
             
-            // Create CSV content
-            const headerRow = ['House', 'Start Timer'];
-            for (let i = 1; i <= laps.length; i++) {
-                headerRow.push(`Lap ${i}`, `Cycle Time ${i}`);
+            // Calculate cycle times
+            function calculateCycleTimes() {
+                const cycleTimes = {};
+                for (let i = 0; i < laps.length; i++) {
+                    // For first cycle time (Lap 1 - Start)
+                    if (i === 0) {
+                        cycleTimes[1] = laps[0].totalTime;
+                    }
+                    // For subsequent cycle times
+                    // When i is even (2,4,6,...), calculate Lap (i+1) - Lap (i)
+                    else if (i % 2 === 0 && i + 1 < laps.length) {
+                        const cycleNumber = (i / 2) + 1;
+                        cycleTimes[cycleNumber] = laps[i + 1].totalTime - laps[i].totalTime;
+                    }
+                }
+                return cycleTimes;
             }
             
+            // Create header row
+            const headerRow = ['House', 'Start Timer'];
+            for (let i = 1; i <= laps.length; i++) {
+                headerRow.push(`Lap ${i}`);
+                // Add Cycle Time after odd-numbered laps (1,3,5,...)
+                if (i % 2 === 1) {
+                    const cycleNumber = Math.ceil(i/2);
+                    headerRow.push(`Cycle Time ${cycleNumber}`);
+                }
+            }
+            
+            // Create data row
             const dataRow = [houseName, '00:00:000'];
+            const cycleTimes = calculateCycleTimes();
+            
             laps.forEach((lap, index) => {
-                dataRow.push(
-                    formatTime(lap.totalTime),
-                    index > 0 ? formatTime(lap.lapTime) : formatTime(lap.totalTime)
-                );
+                dataRow.push(formatTime(lap.totalTime));
+                // Add cycle time after odd-numbered laps
+                if (index % 2 === 0) {
+                    const cycleNumber = Math.floor(index/2) + 1;
+                    if (cycleTimes[cycleNumber]) {
+                        dataRow.push(formatTime(cycleTimes[cycleNumber]));
+                    }
+                }
             });
             
             // Quote all fields and join with proper line endings
